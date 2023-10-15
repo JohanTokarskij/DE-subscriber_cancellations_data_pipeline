@@ -1,5 +1,4 @@
-
-import sqlite3
+from sqlalchemy import create_engine
 import pandas as pd
 import ast
 import logging
@@ -84,7 +83,7 @@ def test_schema(local_df, db_df):
 
 def test_num_cols(local_df, db_df):
     try:
-        assert len(local_df.columns) == len(db_df.columnd)
+        assert len(local_df.columns) == len(db_df.columns)
     except AssertionError as e:
         logging.exception(e)
         raise e
@@ -127,14 +126,16 @@ def main():
     else:
         next_ver = int(lines[0].split(',')[2][0])+1
 
-    con = sqlite3.connect('./dev/cademycode.db')
+    engine = create_engine('sqlite:///./dev/cademycode.db')
+    con = engine.connect()
     students = pd.read_sql_query('SELECT * FROM cademycode_students', con)
     courses = pd.read_sql_query('SELECT * FROM cademycode_courses', con)
     student_jobs = pd.read_sql_query('SELECT * FROM cademycode_student_jobs', con)
     con.close()
 
     try:
-        con = sqlite3.connect('./prod/cademycode_cleansed.db')
+        engine = create_engine('sqlite:///./prod/cademycode_cleansed.db')
+        con = engine.connect()
         clean_db = pd.read_sql_query('SELECT * FROM cademycode_aggregared', con)
         missing_db = pd.read_sql_query('SELECT * FROM incomplete_data', con)
         con.close()
@@ -153,7 +154,8 @@ def main():
         new_missing_data = missing_data
     
     if len(new_missing_data) > 0:
-        con = sqlite3.connect('./dev/cademycode_cleansed.db')
+        engine = create_engine('sqlite:///./dev/cademycode_cleansed.db')
+        con = engine.connect()
         missing_data.to_sql('incomplete_data', con, if_exists='append', index=False)
         con.close()
     
@@ -172,7 +174,8 @@ def main():
             test_schema(df_clean, clean_db)
         test_nulls(df_clean)
 
-        con = sqlite3.connect('./dev/cademycode_cleansed.db')
+        engine = create_engine('sqlite:///./dev/cademycode_cleansed.db')
+        con = engine.connect()
         df_clean.to_sql('cademycode_cleansed', con, if_exists='append', index=False)
         clean_db = pd.read_sql_query('SELECT * FROM cademycode_cleansed', con)
         con.close()

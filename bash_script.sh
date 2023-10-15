@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Ready to clean the data? [1/0]"
+echo "Clean the data from cademycode.db? [1/0]"
 read cleancontinue
 
 if [ $cleancontinue -eq 1 ]
@@ -26,7 +26,7 @@ then
         scriptcontinue=1
     fi
 else
-    echo "Please come back when you are ready"
+    echo "Canceled."
 fi
 
 if [ $scriptcontinue -eq 1 ]
@@ -46,5 +46,5 @@ then
         fi
     done
 else
-    echo "Please come back when you are ready"
+    echo "Canceled."
 fi
